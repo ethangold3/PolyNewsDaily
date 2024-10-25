@@ -54,10 +54,10 @@ def get_markets(params=None):
         
         response.raise_for_status()
         events = response.json()
-        # print(events)
         for event in events:
             high_level_info = {
             "title": safe_get(event, "title"),
+            "ticker": safe_get(event, "ticker"),
             "description": safe_get(event, "description"),
             "end_date": safe_get(event, "endDate"),
             "volume": safe_float(safe_get(event, "volume", default=0)),
@@ -105,15 +105,16 @@ def get_markets(params=None):
                 interest_score*=100
             if options:
                 probabilities = [option["probability"] for option in options]
-                has_100 = any(abs(p - 100) < 0.01 for p in probabilities)
+                has_100 = any(abs(p - 100) < 0.001 for p in probabilities)
     
                 # Check if all probabilities are 0
-                all_zero = all(abs(p) < 0.01 for p in probabilities)
+                all_zero = all(abs(p) < 0.001 for p in probabilities)
                 if  (has_100 or all_zero):
                     interest_score = 0
             output = {
             "interest_score" : interest_score,
             "title": high_level_info["title"],
+            "ticker": high_level_info["ticker"],
             "description": high_level_info["description"],
             "end_date": high_level_info["end_date"],
             "volume": high_level_info["volume"],
@@ -173,7 +174,7 @@ def main():
         
     # }
 
-    markets = get_markets_for_date_range(days_in_past=10, limit=50)
+    markets = get_markets_for_date_range(days_in_past=1, limit=1)
     sorted_markets_by_interest = sorted(markets, key=lambda x: x.get('interest_score', 0), reverse=True)
     if sorted_markets_by_interest:
         json_string = json.dumps(sorted_markets_by_interest[:20], indent=2)

@@ -1,0 +1,34 @@
+[
+  {
+    "interest_score": 500.0,
+    "title": "Will Microsoft shareholders vote for Bitcoin investment? ",
+    "description": "Microsoft is scheduled to hold a vote for on the \"Assessment of Investing in Bitcoin\" at their December 10, 2024 shareholder meeting (see: https://www.sec.gov/Archives/edgar/data/789019/000119312524242884/d878959ddefa14a.htm)\n\nThis market will resolve to \"Yes\" if Microsoft's shareholders approve the \"Assessment of Investing in Bitcoin\" at the shareholder meeting scheduled for December 10, 2024. Otherwise, this market will resolve to \"No.\"\n\nIf the vote does not take place, or if results of the vote are not released by December 31st, 2024, 11:59 PM ET, this market will resolve \"No\". \n\nThe resolution source will be official information from Microsoft or filings with the SEC. ",
+    "end_date": "2024-12-10T12:00:00Z",
+    "volume": 21962.258141,
+    "featured": 0.0,
+    "volume24hr": 21962.258141,
+    "commentCount": 5.0,
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 9.5,
+        "last_trade_price": 0.1,
+        "oneDayPriceChange": 0
+      }
+    ],
+    "tags": [
+      {
+        "id": 107.0,
+        "label": "Business"
+      },
+      {
+        "id": 21.0,
+        "label": "Crypto"
+      },
+      {
+        "id": 235.0,
+        "label": "Bitcoin"
+      }
+    ]
+  }
+]
