@@ -1,10 +1,9 @@
-# backend/app.py
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from database import get_db_connection, setup_database
-import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend/build')
 CORS(app)
 
 @app.route('/api/submit', methods=['POST'])
@@ -50,6 +49,14 @@ def get_subscribers():
     finally:
         cur.close()
         conn.close()
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     setup_database()
