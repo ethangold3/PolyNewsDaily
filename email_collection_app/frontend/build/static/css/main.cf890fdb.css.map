@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.cf890fdb.css","mappings":"AACA,cAAc,CACd,oBAAoB,CACpB,mBAAmB","sources":["index.css"],"sourcesContent":["\n@tailwind base;\n@tailwind components;\n@tailwind utilities;"],"names":[],"sourceRoot":""}
