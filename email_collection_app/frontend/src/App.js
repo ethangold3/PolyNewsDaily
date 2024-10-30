@@ -17,11 +17,11 @@ function App() {
         <div className="text-center mb-12">
           <div className="mx-auto w-48 h-48 mb-8">
             <div className="bg-white rounded-full p-4">
-              <img 
-                src="/logo.jpg" 
-                alt="Poly News Daily Logo"
-                className="w-full h-full object-contain"
-              />
+                      <img 
+            src={process.env.PUBLIC_URL + '/logo.jpg'} 
+            alt="Poly News Daily Logo"
+            className="w-full h-full object-contain"
+          />
             </div>
           </div>
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
