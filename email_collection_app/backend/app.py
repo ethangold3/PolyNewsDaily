@@ -1,11 +1,9 @@
-import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from database import get_db_connection, setup_database
+import os
 
 app = Flask(__name__, static_folder='../frontend/build')
 CORS(app)
-
 @app.route('/api/submit', methods=['POST'])
 def submit():
     data = request.json
