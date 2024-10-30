@@ -1,5 +1,6 @@
 import React from 'react';
 import SubscriptionForm from './components/SubscriptionForm';
+import logo from './logo.jpeg';
 
 function App() {
   return (
@@ -18,10 +19,10 @@ function App() {
           <div className="mx-auto w-48 h-48 mb-8">
             <div className="bg-white rounded-full p-4">
             <img 
-  src={process.env.PUBLIC_URL + '/logo.jpeg'} 
-  alt="Poly News Daily Logo"
-  className="w-full h-full object-contain"
-/>
+            src={logo}
+            alt="Poly News Daily Logo"
+            className="w-full h-full object-contain"
+          />
             </div>
           </div>
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
