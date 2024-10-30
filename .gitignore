@@ -1,3 +1,5 @@
 .env
 __pycache__/
 *.pyc
+email_collection_app/server/venv
+email_collection_app/frontend/node_modules
