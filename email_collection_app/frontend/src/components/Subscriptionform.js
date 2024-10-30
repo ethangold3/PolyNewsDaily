@@ -49,57 +49,62 @@ function SubscriptionForm() {
       [e.target.name]: e.target.value
     });
   };
-
-  return (
-    <div className="max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-2 text-sm font-medium">Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
-        </div>
-        <div>
-          <label className="block mb-2 text-sm font-medium">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
-        </div>
-        <div>
-          <label className="block mb-2 text-sm font-medium">Feedback (Optional)</label>
-          <textarea
-            name="feedback"
-            value={formData.feedback}
-            onChange={handleChange}
-            className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
-            rows="3"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-md transition-colors"
-        >
-          {isLoading ? 'Subscribing...' : 'Subscribe'}
-        </button>
-      </form>
-      {message && (
-        <div className="mt-4 text-center text-sm text-gray-700">
-          {message}
-        </div>
-      )}
-    </div>
-  );
-}
-
+  
+    return (
+      <div className="p-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          Subscribe to Daily Insights
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              What topics interest you? (Optional)
+            </label>
+            <textarea
+              name="feedback"
+              value={formData.feedback}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              rows="3"
+              placeholder="e.g., Politics, Technology, Economics"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300"
+          >
+            {isLoading ? 'Subscribing...' : 'Get Daily Insights'}
+          </button>
+        </form>
+        {message && (
+          <div className="mt-4 text-center text-sm text-gray-700">
+            {message}
+          </div>
+        )}
+      </div>
+    );
+  }
 export default SubscriptionForm;
