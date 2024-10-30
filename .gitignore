@@ -3,3 +3,11 @@ __pycache__/
 *.pyc
 email_collection_app/server/venv
 email_collection_app/frontend/node_modules
+
+venv/
+*.pyc
+__pycache__/
+.env
+.DS_Store
+email_collection_app/frontend/node_modules/
+*.log
