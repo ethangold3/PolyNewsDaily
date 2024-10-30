@@ -1,0 +1,19 @@
+<svg viewBox="0 0 300 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Graph Line -->
+  <path d="M40 40 Q 100 20, 150 35 T 260 30" 
+        fill="none" 
+        stroke="#2E87EC" 
+        stroke-width="2" 
+        stroke-opacity="0.3"
+        stroke-linecap="round"/>
+  
+  <!-- Main Text -->
+  <text x="150" y="35" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" 
+        font-size="28" 
+        font-weight="600" 
+        fill="#FFFFFF"
+        text-anchor="middle">
+    Poly<tspan fill="#60A5FA">News</tspan>Daily
+  </text>
+</svg>

@@ -1,5 +1,4 @@
-# newsletter_sender.py
-from typing import List
+from typing import List, Dict
 from datetime import datetime
 from pydantic import BaseModel
 import json
@@ -7,18 +6,26 @@ from pathlib import Path
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 from string import Template
 import time
+import re
 
 class Article(BaseModel):
+    id: int
     headline: str
     subheader: str
     blurb: str
+    score: float
+    ticker: str
+    links: List[str]
 
 class NewsletterSender:
     def __init__(self, template_path: str = "newsletter_template.html"):
         self.template_path = Path(template_path)
+        self.logo_path = Path("PNDlogo.jpeg")
         self.load_template()
+        self.load_logo()
     
     def load_template(self):
         """Load the HTML template"""
@@ -27,46 +34,144 @@ class NewsletterSender:
         
         with open(self.template_path, 'r') as f:
             self.template = Template(f.read())
+            
+    def load_logo(self):
+        """Load the JPEG logo"""
+        if not self.logo_path.exists():
+            raise FileNotFoundError("Logo file not found at PNDlogo.jpeg")
+            
+        with open(self.logo_path, 'rb') as f:
+            self.logo_data = f.read()
 
-    def format_articles(self, articles: List[Article]) -> str:
-        """Format articles into HTML"""
-        articles_html = ""
-        for article in articles:
-            article_html = f"""
+    def _highlight_numbers(self, text: str) -> str:
+        """Highlight only numbers that are followed by a percentage sign with a brighter blue"""
+        pattern = r'(\d+(?:\.\d+)?\s*%)'
+        return re.sub(pattern, r'<span style="color: #60A5FA;">\1</span>', text)
+
+    def format_articles(self, articles: List[Article], groups: Dict[str, List[int]] = None) -> str:
+        """Format articles into HTML with optional grouping"""
+        # Start with logo section
+        articles_html = f"""
+        <tr>
+            <td style="padding: 30px 30px 20px 30px; background-color: #FFFFFF; text-align: center;">
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <img src="cid:logo" alt="PND Logo" style="width: 100%; height: auto; display: block; margin: 0 auto;">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 0 30px 30px 30px; background-color: #FFFFFF;">
+                <div style="border-top: 1px solid #2E87EC; margin: 0 auto;"></div>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding: 20px 30px 10px 30px; background-color: #FFFFFF;">
+                <div text-align: left;">
+                    <p style="margin: 0; color: #000000; font-size: 12; 
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; 
+                            line-height: 1.5;">
+                        Let's hear today's breaking news powered by Polymarket. Click any headline to link to the source market. Market odds are accurate as of the morning of {datetime.now().strftime("%B %d, %Y")}.
+                    </p>
+                </div>
+            </td>
+        </tr>
+    """
+        
+        # Rest of the format_articles method remains the same
+        used_article_ids = set()
+        article_lookup = {article.id: article for article in articles}
+        
+        if groups:
+            for group_title, article_ids in groups.items():
+                group_articles = [article_lookup[aid] for aid in article_ids 
+                                if aid in article_lookup]
+                high_scoring_articles = [article for article in group_articles if article.score > 5]
+
+                if high_scoring_articles:
+                    articles_html += f"""
+                <tr>
+                    <td style="padding: 20px 30px 10px 30px; background-color: #FFFFFF;">
+                        <div style="padding: 15px; border-radius: 8px; border: 1px solid #2E87EC; background-color: #EEEEEE; text-align: center;">
+                            <h2 style="margin: 0; color: #111111; font-size: 24px; 
+                                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; 
+                                    font-weight: 600; letter-spacing: 0.5px;">
+                                {self._highlight_numbers(group_title)}
+                            </h2>
+                        </div>
+                    </td>
+                </tr>
+            """
+
+                    for article in sorted(high_scoring_articles, key=lambda x: x.score, reverse=True):
+                        articles_html += self._format_single_article(article)
+
+                    used_article_ids.update(article.id for article in high_scoring_articles)
+        ungrouped_articles = [article for article in articles 
+                            if article.id not in used_article_ids]
+        
+        if ungrouped_articles:
+            if groups and groups.keys():
+                articles_html += """
                     <tr>
-                        <td style="padding: 20px 30px;">
-                            <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px;">
-                                <tr>
-                                    <td style="padding: 20px;">
-                                        <h2 style="margin: 0; color: #1a1a1a; font-size: 20px; font-weight: bold;">
-                                            {article.headline}
-                                        </h2>
-                                        <h3 style="margin: 10px 0; color: #666666; font-size: 16px; font-weight: bold;">
-                                            {article.subheader}
-                                        </h3>
-                                        <p style="margin: 0; color: #333333; font-size: 14px; line-height: 1.6;">
-                                            {article.blurb}
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
+                        <td style="padding: 20px 30px 10px 30px; background-color: #FFFFFF;">
+                            <div style="padding: 15px; border-radius: 8px; border: 1px solid #2E87EC; background-color: #EEEEEE; text-align: center;">
+                                <h2 style="margin: 0; color: #000000; font-size: 24px; 
+                                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; 
+                                        font-weight: 600; letter-spacing: 0.5px;">
+                                    Other Stories
+                                </h2>
+                            </div>
                         </td>
                     </tr>
-            """
-            articles_html += article_html
+                """
+            
+            for article in sorted(ungrouped_articles, key=lambda x: x.score, reverse=True):
+                articles_html += self._format_single_article(article)
+
         return articles_html
 
-    def send_newsletter(self, smtp_config: dict, emails: List[str], articles: List[Article]):
+    def _format_single_article(self, article: Article) -> str:
+        """Format a single article into HTML with dark mode styling"""
+        polymarket_link = f"https://polymarket.com/event/{article.ticker}"
+        
+        return f"""
+            <tr>
+                <td style="padding: 15px 30px; background-color: #FFFFFF;">
+                    <div style="background-color: #EEEEEE; border-radius: 8px; overflow: hidden; border: 1px solid #2E87EC;">
+                        <div style="padding: 20px;">
+                            <a href="{polymarket_link}" style="text-decoration: none;">
+                                <h2 style="margin: 0; color: #000000; font-size: 20px; 
+                                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; 
+                                        font-weight: 500; line-height: 1.4;">
+                                    {self._highlight_numbers(article.headline)}
+                                </h2>
+                            </a>
+                            <h3 style="margin: 10px 0; color: #1A1A1A; font-size: 16px; 
+                                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; 
+                                    font-weight: 400;">
+                                {self._highlight_numbers(article.subheader)}
+                            </h3>
+                            <p style="margin: 0; color: #333333; font-size: 14px; line-height: 1.6;
+                                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;">
+                                {self._highlight_numbers(article.blurb)}
+                            </p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        """
+
+    def send_newsletter(self, smtp_config: dict, emails: List[str], articles: List[Article], 
+                       groups: Dict[str, List[int]] = None):
         """Send newsletter to all recipients"""
         try:
-            # Setup SMTP server
             server = smtplib.SMTP(smtp_config['host'], smtp_config['port'])
             server.starttls()
             server.login(smtp_config['auth']['user'], smtp_config['auth']['pass'])
 
-            # Prepare email content
             formatted_date = datetime.now().strftime("%B %d, %Y")
-            articles_html = self.format_articles(articles)
+            articles_html = self.format_articles(articles, groups)
             html_content = self.template.substitute(
                 date=formatted_date,
                 articles=articles_html
@@ -75,21 +180,30 @@ class NewsletterSender:
             results = {'successful': [], 'failed': []}
             batch_size = 50
 
-            # Send in batches
             for i in range(0, len(emails), batch_size):
                 batch = emails[i:i + batch_size]
                 print(f"Sending batch {(i//batch_size) + 1}/{(len(emails)-1)//batch_size + 1}")
 
                 for email in batch:
                     try:
-                        # Create message
-                        msg = MIMEMultipart('alternative')
-                        msg['Subject'] = f"PolyNewsDaily Update - {formatted_date}"
+                        msg = MIMEMultipart('related')
+                        msg_alternative = MIMEMultipart('alternative')
+                        msg.attach(msg_alternative)
+                        
+                        msg['Subject'] = "📈 Today's Prediction Market Powered News"
                         msg['From'] = smtp_config['from']
                         msg['To'] = email
-                        msg.attach(MIMEText(html_content, 'html'))
+                        
+                        # Attach HTML content
+                        msg_alternative.attach(MIMEText(html_content, 'html'))
+                        
+                        # Attach logo image
+                        img = MIMEImage(self.logo_data)
+                        img.add_header('Content-ID', '<logo>')
+                        img.add_header('Content-Disposition', 'inline; filename="PNDlogo.jpeg"')  # Add filename
+                        img.add_header('Content-Type', 'image/jpeg; name="PNDlogo.jpeg"')  # Add content type w
+                        msg.attach(img)
 
-                        # Send email
                         server.send_message(msg)
                         results['successful'].append(email)
                         print(f"Successfully sent to: {email}")
@@ -101,24 +215,11 @@ class NewsletterSender:
                         })
                         print(f"Failed to send to {email}: {str(e)}")
                     
-                    # Small delay between emails
                     time.sleep(0.2)
                 
-                # Delay between batches
                 time.sleep(1)
 
             server.quit()
-            
-            # Print results
-            print(f"\nNewsletter Sending Results:")
-            print(f"Successfully sent: {len(results['successful'])}")
-            print(f"Failed: {len(results['failed'])}")
-            
-            if results['failed']:
-                print("\nFailed emails:")
-                for failure in results['failed']:
-                    print(f"- {failure['email']}: {failure['error']}")
-            
             return results
             
         except Exception as e:
