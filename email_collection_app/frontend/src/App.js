@@ -16,9 +16,12 @@ function App() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="mx-auto w-48 h-48 mb-8">
-            {/* Replace with actual logo */}
             <div className="bg-white rounded-full p-4">
-              <div className="text-3xl font-bold text-indigo-600">PND</div>
+              <img 
+                src="/logo.jpg" 
+                alt="Poly News Daily Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
           </div>
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
