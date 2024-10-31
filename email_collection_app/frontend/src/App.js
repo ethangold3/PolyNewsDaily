@@ -22,6 +22,8 @@ function App() {
             src={logo}
             alt="Poly News Daily Logo"
             className="w-full h-full object-contain"
+            width="400" 
+     height="500" 
           />
             </div>
           </div>
