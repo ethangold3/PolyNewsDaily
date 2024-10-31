@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import SubscriptionForm from './components/SubscriptionForm';
 import logo from './logo.jpeg';
+import screenshot1 from './screenshot1.jpg';  // Add your actual image path
+import screenshot2 from './screenshot2.jpg';
 
 function App() {
   const [showAbout, setShowAbout] = useState(false);
@@ -94,9 +96,49 @@ function App() {
             </div>
           </div>
 
-          <div className="max-w-4xl mx-auto">
+                    {/* Newsletter Examples Section */}
+                    <div className="max-w-4xl mx-auto mt-16">
             <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8">
-              {/* ... Newsletter section content ... */}
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Example Daily Newsletter
+              </h2>
+              <p className="text-gray-600 text-center mb-8">
+                Here's what you'll receive in your inbox every day
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="relative group">
+                  <div className="overflow-hidden rounded-lg shadow-lg">
+                    <img 
+                      src={screenshot1}
+                      alt="Newsletter Example 1"
+                      className="w-full h-auto transform transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <p className="text-sm text-gray-600">Morning Newsletter Example</p>
+                  </div>
+                </div>
+
+                <div className="relative group">
+                  <div className="overflow-hidden rounded-lg shadow-lg">
+                    <img 
+                      src={screenshot2}
+                      alt="Newsletter Example 2"
+                      className="w-full h-auto transform transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <p className="text-sm text-gray-600">Market Analysis Example</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 text-center">
+                <p className="text-gray-700">
+                  Subscribe above to receive daily insights directly in your inbox!
+                </p>
+              </div>
             </div>
           </div>
         </div>
