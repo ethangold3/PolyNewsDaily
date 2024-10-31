@@ -4,8 +4,10 @@ from email_validator import validate_email, EmailNotValidError
 import re
 import os
 from database import get_db_connection, setup_database
-from PolyNewsDaily.agent.newsletter_sender import NewsletterSender
+import sys
 import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from agent.newsletter_sender import NewsletterSender
 
 app = Flask(__name__, static_folder='../frontend/build')
 CORS(app)
