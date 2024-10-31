@@ -1,66 +1,102 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SubscriptionForm from './components/SubscriptionForm';
 import logo from './logo.jpeg';
 
 function App() {
+  const [showAbout, setShowAbout] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0">
-        <div className="absolute animate-blob mix-blend-multiply filter blur-xl opacity-70 top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full"></div>
-        <div className="absolute animate-blob animation-delay-2000 mix-blend-multiply filter blur-xl opacity-70 top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full"></div>
-        <div className="absolute animate-blob animation-delay-4000 mix-blend-multiply filter blur-xl opacity-70 -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full"></div>
-      </div>
-
-      {/* Main content */}
-      <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="mx-auto w-48 h-48 mb-8">
-            <div className="bg-white rounded-full p-4">
-            <img 
+      {/* Black Banner */}
+      <div className="bg-black w-full p-4 flex justify-between items-center fixed top-0 z-50">
+        <div className="flex items-center">
+          <img 
             src={logo}
             alt="Poly News Daily Logo"
-            className="w-full h-full object-contain"
-            width="400" 
-     height="500" 
+            className="h-12 w-12 object-contain rounded-full bg-white p-1"
           />
+          <span className="text-white text-xl font-bold ml-3">Poly News Daily</span>
+        </div>
+        <button 
+          onClick={() => setShowAbout(true)}
+          className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          About
+        </button>
+      </div>
+
+      {/* About Modal */}
+      {showAbout && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-bold">About Poly News Daily</h2>
+              <button 
+                onClick={() => setShowAbout(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="prose">
+              <p>
+                Poly News Daily provides probabilistic insights into current events using prediction market data. 
+                We analyze market probabilities to give you a quantified perspective on news and future events.
+              </p>
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold">Contact</h3>
+                <p>Ethan Goldberg</p>
+                <a href="mailto:ethanagoldberg@gmail.com" className="text-blue-600 hover:text-blue-800">
+                  ethanagoldberg@gmail.com
+                </a>
+              </div>
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold">GitHub</h3>
+                <a 
+                  href="https://github.com/ethangold3/PolyNewsDaily" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  View Project Repository
+                </a>
+              </div>
             </div>
           </div>
-          <h1 className="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
-            Poly News Daily
-          </h1>
-          <p className="mt-3 max-w-md mx-auto text-xl text-white sm:text-2xl md:mt-5 md:max-w-3xl">
-            Get probabilistic news insights powered by prediction markets
-          </p>
         </div>
+      )}
 
-        {/* Subscription Form Section */}
-        <div className="max-w-md mx-auto mb-16">
-          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl">
-            <SubscriptionForm />
+      {/* Add padding to account for fixed banner */}
+      <div className="pt-20">
+        {/* Main content */}
+        <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+          {/* Animated background elements */}
+          <div className="absolute inset-0">
+            <div className="absolute animate-blob mix-blend-multiply filter blur-xl opacity-70 top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full"></div>
+            <div className="absolute animate-blob animation-delay-2000 mix-blend-multiply filter blur-xl opacity-70 top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full"></div>
+            <div className="absolute animate-blob animation-delay-4000 mix-blend-multiply filter blur-xl opacity-70 -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full"></div>
           </div>
-        </div>
 
-        {/* Example Newsletter Section */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Latest Newsletter Example</h2>
-            <div className="prose max-w-none">
-              <h3 className="text-xl font-semibold text-indigo-600">US Presidential Election 2024</h3>
-              <div className="flex items-center gap-4 my-4">
-                <div className="w-24 h-24 bg-gray-200 rounded-lg">
-                  {/* Placeholder for chart/image */}
-                </div>
-                <p className="text-gray-700">
-                  According to Polymarket, Trump currently has a 48% chance of winning the 2024 election,
-                  while Biden stands at 42%. This represents a 3-point shift from last week...
-                </p>
-              </div>
-              <div className="mt-6 flex justify-between items-center">
-                <span className="text-sm text-gray-500">Published: March 19, 2024</span>
-                <span className="text-sm font-medium text-indigo-600">Read more examples →</span>
-              </div>
+          {/* Header - removed logo since it's now in banner */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
+              Poly News Daily
+            </h1>
+            <p className="mt-3 max-w-md mx-auto text-xl text-white sm:text-2xl md:mt-5 md:max-w-3xl">
+              Get probabilistic news insights powered by prediction markets
+            </p>
+          </div>
+
+          {/* Rest of your components... */}
+          <div className="max-w-md mx-auto mb-16">
+            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl">
+              <SubscriptionForm />
+            </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8">
+              {/* ... Newsletter section content ... */}
             </div>
           </div>
         </div>
