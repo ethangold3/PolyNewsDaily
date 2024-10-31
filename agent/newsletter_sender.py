@@ -26,6 +26,60 @@ class NewsletterSender:
         self.logo_path = Path("PNDlogo.jpeg")
         self.load_template()
         self.load_logo()
+        self.db_conn = None
+
+    def save_newsletter_to_db(self, html_content: str, subject: str):
+        """Save the newsletter content to the database"""
+        try:
+            from PolyNewsDaily.email_collection_app.backend.database import get_db_connection
+            conn = get_db_connection()
+            cur = conn.cursor()
+            
+            # First, delete any existing newsletters
+            cur.execute("DELETE FROM latest_newsletter")
+            
+            # Insert the new newsletter
+            cur.execute("""
+                INSERT INTO latest_newsletter (html_content, subject)
+                VALUES (%s, %s)
+            """, (html_content, subject))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            print("Newsletter saved to database successfully")
+        except Exception as e:
+            print(f"Error saving newsletter to database: {str(e)}")
+
+    def get_latest_newsletter(self):
+        """Retrieve the latest newsletter from the database"""
+        try:
+            from PolyNewsDaily.email_collection_app.backend.database import get_db_connection
+            conn = get_db_connection()
+            cur = conn.cursor()
+            
+            cur.execute("""
+                SELECT html_content, subject, sent_date 
+                FROM latest_newsletter 
+                ORDER BY sent_date DESC 
+                LIMIT 1
+            """)
+            
+            result = cur.fetchone()
+            cur.close()
+            conn.close()
+            
+            if result:
+                return {
+                    'html_content': result[0],
+                    'subject': result[1],
+                    'sent_date': result[2]
+                }
+            return None
+        except Exception as e:
+            print(f"Error retrieving newsletter from database: {str(e)}")
+            return None
+
     
     def load_template(self):
         """Load the HTML template"""
@@ -177,6 +231,9 @@ class NewsletterSender:
                 articles=articles_html
             )
 
+            subject = "📈 Today's Prediction Market Powered News"
+            self.save_newsletter_to_db(html_content, subject)
+
             results = {'successful': [], 'failed': []}
             batch_size = 50
 
@@ -203,7 +260,6 @@ class NewsletterSender:
                         img.add_header('Content-Disposition', 'inline; filename="PNDlogo.jpeg"')  # Add filename
                         img.add_header('Content-Type', 'image/jpeg; name="PNDlogo.jpeg"')  # Add content type w
                         msg.attach(img)
-
                         server.send_message(msg)
                         results['successful'].append(email)
                         print(f"Successfully sent to: {email}")
@@ -225,6 +281,46 @@ class NewsletterSender:
         except Exception as e:
             print(f"Error sending newsletter: {str(e)}")
             return None
+        
+
+    def send_latest_to_subscriber(self, smtp_config: dict, email: str):
+        """Send the most recent newsletter to a new subscriber"""
+        latest = self.get_latest_newsletter()
+        if not latest:
+            print(f"No recent newsletter found to send to {email}")
+            return False
+            
+        try:
+            server = smtplib.SMTP(smtp_config['host'], smtp_config['port'])
+            server.starttls()
+            server.login(smtp_config['auth']['user'], smtp_config['auth']['pass'])
+            
+            msg = MIMEMultipart('related')
+            msg_alternative = MIMEMultipart('alternative')
+            msg.attach(msg_alternative)
+            
+            msg['Subject'] = latest['subject']
+            msg['From'] = smtp_config['from']
+            msg['To'] = email
+            
+            # Attach HTML content
+            msg_alternative.attach(MIMEText(latest['html_content'], 'html'))
+            
+            # Attach logo image
+            img = MIMEImage(self.logo_data)
+            img.add_header('Content-ID', '<logo>')
+            img.add_header('Content-Disposition', 'inline; filename="PNDlogo.jpeg"')
+            img.add_header('Content-Type', 'image/jpeg; name="PNDlogo.jpeg"')
+            msg.attach(img)
+            
+            server.send_message(msg)
+            server.quit()
+            print(f"Successfully sent latest newsletter to: {email}")
+            return True
+            
+        except Exception as e:
+            print(f"Error sending latest newsletter to {email}: {str(e)}")
+            return False
 
 def test_smtp_connection(smtp_config: dict) -> bool:
     """Test SMTP connection with provided configuration"""

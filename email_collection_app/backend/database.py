@@ -81,6 +81,17 @@ def setup_database():
         )
         ''')
         print("\nDatabase setup complete - subscribers table created/verified.")
+
+        cur.execute('''
+        CREATE TABLE IF NOT EXISTS latest_newsletter (
+            id SERIAL PRIMARY KEY,
+            html_content TEXT NOT NULL,
+            sent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            subject VARCHAR(255) NOT NULL
+        )
+        ''')
+        print("\nDatabase setup complete - latest_newsletter table created/verified.")
+        
         
         # Check if table exists and show count
         cur.execute('SELECT COUNT(*) FROM subscribers;')

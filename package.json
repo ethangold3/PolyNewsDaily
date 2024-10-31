@@ -1,0 +1,10 @@
+{
+    "name": "polynewsdaily",
+    "version": "1.0.0",
+    "engines": {
+      "node": "16.x"
+    },
+    "cacheDirectories": [
+      "email_collection_app/frontend/node_modules"
+    ]
+  }
