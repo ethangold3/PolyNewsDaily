@@ -34,6 +34,24 @@ function SubscriptionForm() {
       const data = await response.json();
       setMessage(data.message);
       if (response.ok) {
+        // After successful subscription, trigger sending of latest newsletter
+        const sendLatestResponse = await fetch(
+          process.env.NODE_ENV === 'production' 
+            ? '/api/send-latest'
+            : 'http://localhost:5000/api/send-latest',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: formData.email }),
+          }
+        );
+        
+        if (!sendLatestResponse.ok) {
+          console.error('Failed to send latest newsletter');
+        }
+        
         setFormData({ name: '', email: '', feedback: '' });
       }
     } catch (error) {

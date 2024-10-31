@@ -116,7 +116,7 @@ function App() {
                     />
                   </div>
                   <div className="mt-4 text-center">
-                    <p className="text-sm text-gray-600">Morning Newsletter Example</p>
+                    <p className="text-sm text-gray-600">More informed news</p>
                   </div>
                 </div>
 
@@ -129,7 +129,7 @@ function App() {
                     />
                   </div>
                   <div className="mt-4 text-center">
-                    <p className="text-sm text-gray-600">Market Analysis Example</p>
+                    <p className="text-sm text-gray-600">A probabilistic view of current events</p>
                   </div>
                 </div>
               </div>

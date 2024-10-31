@@ -3,6 +3,9 @@ from flask_cors import CORS
 from email_validator import validate_email, EmailNotValidError
 import re
 import os
+from database import get_db_connection, setup_database
+from PolyNewsDaily.agent.newsletter_sender import NewsletterSender
+import os
 
 app = Flask(__name__, static_folder='../frontend/build')
 CORS(app)
@@ -95,6 +98,43 @@ def get_subscribers():
     finally:
         cur.close()
         conn.close()
+
+
+# Add this with your other routes
+@app.route('/api/send-latest', methods=['POST'])
+def send_latest_newsletter():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+            
+        # Initialize newsletter sender
+        newsletter_sender = NewsletterSender()
+        
+        # Get SMTP config from environment variables
+        smtp_config = {
+            'host': os.getenv('SMTP_HOST'),
+            'port': int(os.getenv('SMTP_PORT')),
+            'from': os.getenv('SMTP_FROM'),
+            'auth': {
+                'user': os.getenv('SMTP_USER'),
+                'pass': os.getenv('SMTP_PASS')
+            }
+        }
+        
+        # Send the latest newsletter
+        success = newsletter_sender.send_latest_to_subscriber(smtp_config, email)
+        
+        if success:
+            return jsonify({'message': 'Latest newsletter sent successfully'}), 200
+        else:
+            return jsonify({'error': 'Failed to send latest newsletter'}), 500
+            
+    except Exception as e:
+        print(f"Error sending latest newsletter: {str(e)}")
+        return jsonify({'error': 'Server error'}), 500
 
 if __name__ == '__main__':
     setup_database()
