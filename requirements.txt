@@ -1,6 +1,15 @@
-
 langchain==0.3.1
+langchain-community==0.3.1
+langchain-core==0.3.7
+langchain-openai==0.2.1
+langchain-text-splitters==0.3.0
 langgraph==0.2.30
+langgraph-checkpoint==1.0.14
+langgraph-checkpoint-sqlite==1.0.4
+langgraph-sdk==0.1.31
+langsmith==0.1.129
+
+
 openai==1.50.2
 python-dotenv==1.0.1
 requests==2.31.0
