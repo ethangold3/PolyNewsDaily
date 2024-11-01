@@ -10,7 +10,10 @@ from email.mime.image import MIMEImage
 from string import Template
 import time
 import re
-
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from email_collection_app.backend.database import get_db_connection
 class Article(BaseModel):
     id: int
     headline: str
@@ -31,7 +34,7 @@ class NewsletterSender:
     def save_newsletter_to_db(self, html_content: str, subject: str):
         """Save the newsletter content to the database"""
         try:
-            from PolyNewsDaily.email_collection_app.backend.database import get_db_connection
+
             conn = get_db_connection()
             cur = conn.cursor()
             
@@ -54,7 +57,6 @@ class NewsletterSender:
     def get_latest_newsletter(self):
         """Retrieve the latest newsletter from the database"""
         try:
-            from PolyNewsDaily.email_collection_app.backend.database import get_db_connection
             conn = get_db_connection()
             cur = conn.cursor()
             
