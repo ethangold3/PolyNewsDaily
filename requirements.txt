@@ -8,8 +8,6 @@ langgraph-checkpoint==1.0.14
 langgraph-checkpoint-sqlite==1.0.4
 langgraph-sdk==0.1.31
 langsmith==0.1.129
-
-
 openai==1.50.2
 python-dotenv==1.0.1
 requests==2.31.0
