@@ -1,3 +1,4 @@
+
 langchain==0.3.1
 langgraph==0.2.30
 openai==1.50.2
@@ -9,7 +10,7 @@ nbconvert==7.16.4
 ipykernel==6.21.0
 ipython
 
-# Flask and dependencies with compatible versions
+# Flask and dependencies
 Flask==2.0.1
 Werkzeug==2.0.1
 flask-cors==3.0.10
