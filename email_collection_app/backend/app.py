@@ -116,16 +116,18 @@ def send_latest_newsletter():
         newsletter_sender = NewsletterSender()
         
         # Get SMTP config from environment variables
+
         smtp_config = {
-            'host': os.getenv('SMTP_HOST'),
-            'port': int(os.getenv('SMTP_PORT')),
-            'from': os.getenv('SMTP_FROM'),
-            'auth': {
-                'user': os.getenv('SMTP_USER'),
-                'pass': os.getenv('SMTP_PASS')
-            }
+            "host": "smtp.gmail.com",
+            "port": 587,
+            "secure": True,
+            "auth": {
+                "user": "polynewsdailynewsletter@gmail.com",  # Your full Gmail address
+                'pass': os.getenv('SMTP_PASS')   # The 16-character app password you generated
+            },
+            "from": '"PolyNewsDaily Update" <polynewsdailynewsletter@gmail.com>'  # Use your Gmail address here too
         }
-        
+
         # Send the latest newsletter
         success = newsletter_sender.send_latest_to_subscriber(smtp_config, email)
         
