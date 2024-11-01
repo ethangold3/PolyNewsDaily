@@ -8,9 +8,23 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from agent.newsletter_sender import NewsletterSender
+import logging
+import traceback
+import psycopg2
+from flask import jsonify, request
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='../frontend/build')
 CORS(app)
+
+try:
+    setup_database()
+    logger.info("Database initialization complete!")
+except Exception as e:
+    logger.error(f"Error during database initialization: {str(e)}")
 
 
 def is_valid_email(email):
@@ -45,40 +59,63 @@ def serve_static(path):
 
 @app.route('/api/submit', methods=['POST'])
 def submit():
-    data = request.json
-    
-    # Input validation
-    if not all(key in data for key in ['name', 'email', 'feedback']):
-        return jsonify({"message": "Missing required fields"}), 400
-    
-    # Sanitize and validate email
-    sanitized_email = sanitize_input(data['email'])
-    if not sanitized_email or not is_valid_email(sanitized_email):
-        return jsonify({"message": "Invalid email address"}), 400
-    
-    # Sanitize other inputs
-    name = data['name'].strip()[:100]  # Limit name length
-    feedback = data['feedback'].strip()[:500]  # Limit feedback length
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
+    logger.info("Received submission request")
     try:
-        cur.execute(
-            """
-            INSERT INTO subscribers (name, email, feedback)
-            VALUES (%s, %s, %s)
-            """,
-            (name, sanitized_email, feedback)
-        )
-        conn.commit()
-        return jsonify({"message": "Thank you for subscribing!"}), 200
+        data = request.json
+        logger.debug(f"Received data: {data}")
+        
+        # Input validation
+        if not all(key in data for key in ['name', 'email', 'feedback']):
+            logger.warning("Missing required fields")
+            return jsonify({"message": "Missing required fields"}), 400
+        
+        # Sanitize and validate email
+        sanitized_email = sanitize_input(data['email'])
+        if not sanitized_email or not is_valid_email(sanitized_email):
+            logger.warning(f"Invalid email address: {data['email']}")
+            return jsonify({"message": "Invalid email address"}), 400
+        
+        # Sanitize other inputs
+        name = data['name'].strip()[:100]  # Limit name length
+        feedback = data['feedback'].strip()[:500]  # Limit feedback length
+        
+        logger.info(f"Attempting database connection")
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        try:
+            logger.debug("Executing INSERT query")
+            cur.execute(
+                """
+                INSERT INTO subscribers (name, email, feedback)
+                VALUES (%s, %s, %s)
+                RETURNING id
+                """,
+                (name, sanitized_email, feedback)
+            )
+            
+            subscriber_id = cur.fetchone()[0]
+            logger.info(f"Successfully inserted subscriber with ID: {subscriber_id}")
+            
+            conn.commit()
+            return jsonify({"message": "Thank you for subscribing!"}), 200
+            
+        except psycopg2.Error as e:
+            conn.rollback()
+            logger.error(f"Database error: {str(e)}")
+            logger.error(f"Error details: {e.diag.message_detail if hasattr(e, 'diag') else 'No details available'}")
+            logger.error(f"Error hint: {e.diag.message_hint if hasattr(e, 'diag') else 'No hint available'}")
+            return jsonify({"message": f"Database error: {str(e)}"}), 500
+            
+        finally:
+            cur.close()
+            conn.close()
+            logger.info("Database connection closed")
+            
     except Exception as e:
-        conn.rollback()
-        return jsonify({"message": "An error occurred."}), 500
-    finally:
-        cur.close()
-        conn.close()
+        logger.error("Unexpected error in submit endpoint")
+        logger.error(traceback.format_exc())
+        return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
 
 @app.route('/api/subscribers', methods=['GET'])
 def get_subscribers():
