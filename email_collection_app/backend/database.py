@@ -10,7 +10,7 @@ load_dotenv()
 
 def get_db_connection():
     """Get database connection for either local or Heroku environment"""
-    DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://localhost/email_subscribers')
+    DATABASE_URL = os.getenv('DATABASE_URL')
     
     # Print the URL (with password hidden) for debugging
     parsed_url = urlparse(DATABASE_URL)
@@ -27,6 +27,8 @@ def get_db_connection():
     except psycopg2.Error as e:
         print(f"Unable to connect to the database: {e}")
         raise
+
+
 
 def test_connection():
     """Test database connection and print detailed connection info"""
