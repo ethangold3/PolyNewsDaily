@@ -49,23 +49,40 @@ class NewsletterSender:
             for article in articles:
                 cur.execute("""
                     INSERT INTO articles (id, headline, subheader, blurb, score, ticker)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                 """, (article.id, article.headline, article.subheader, 
                      article.blurb, article.score, article.ticker))
                 
 
             for group_name, article_ids in groups.items():
-                cur.execute("INSERT INTO groups (name) VALUES (?)", (group_name,))
+                cur.execute("INSERT INTO groups (name) VALUES (%s)", (group_name,))
                 
                 for article_id in article_ids:
                     cur.execute("""
                         INSERT INTO group_articles (group_name, article_id)
-                        VALUES (?, ?)
+                        VALUES (%s, %s)
                     """, (group_name, article_id))
+
+            cur.execute("SELECT COUNT(*) FROM articles")
+            final_article_count = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM groups")
+            group_count = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM group_articles")
+            group_articles_count = cur.fetchone()[0]
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            print(f"""
+    Database summary:
+    - Articles: {final_article_count}
+    - Groups: {group_count}
+    - Group-Article associations: {group_articles_count}
+            """)
             
             conn.commit()
             
-            conn.commit()
             cur.close()
             conn.close()
             print("Newsletter saved to database successfully")
