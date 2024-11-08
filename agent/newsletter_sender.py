@@ -14,7 +14,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from email_collection_app.backend.database import get_db_connection
-class Article(BaseModel):
+class ArticleOutput(BaseModel):
     id: int
     headline: str
     subheader: str
@@ -32,7 +32,7 @@ class NewsletterSender:
         self.load_logo()
         self.db_conn = None
 
-    def save_newsletter_to_db(self, articles: List[Article], 
+    def save_newsletter_to_db(self, articles: List[ArticleOutput], 
                        groups: Dict[str, List[int]] = None):
         """Save the newsletter content to the database"""
         try:
