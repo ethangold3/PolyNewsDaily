@@ -85,7 +85,7 @@ def setup_database():
         print("\nDatabase setup complete - subscribers table created/verified.")
 
         cur.execute('''
-        CREATE TABLE articles (
+        CREATE TABLE IF NOT EXISTS articles (
             id INTEGER PRIMARY KEY,
             headline TEXT,
             subheader TEXT,
@@ -93,16 +93,16 @@ def setup_database():
             score FLOAT,
             ticker VARCHAR(10)
 );
-        )
+        
         ''')
         cur.execute('''
-        CREATE TABLE groups (
+        CREATE TABLE IF NOT EXISTS groups (
             name VARCHAR(255) PRIMARY KEY
         );
         ''')
 
         cur.execute('''
-        CREATE TABLE group_articles (
+        CREATE TABLE IF NOT EXISTS group_articles (
             group_name VARCHAR(255),
             article_id INTEGER,
             FOREIGN KEY (group_name) REFERENCES groups(name) ON DELETE CASCADE,
