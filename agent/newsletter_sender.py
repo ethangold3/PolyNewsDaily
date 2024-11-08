@@ -71,6 +71,20 @@ class NewsletterSender:
             print("Newsletter saved to database successfully")
         except Exception as e:
             print(f"Error saving newsletter to database: {str(e)}")
+    def get_subscriber_emails(self) -> List[str]:
+        """Get list of all subscriber emails from database"""
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute('SELECT email FROM subscribers')
+            emails = [row[0] for row in cur.fetchall()]
+            print(f"Found {len(emails)} subscribers")
+            cur.close()
+            conn.close()
+            return emails
+        except Exception as e:
+            print(f"Error getting subscriber emails: {str(e)}")
+            return []
 
     def get_latest_newsletter(self) -> tuple[List[Article], Dict[str, List[int]]]:
         """Retrieve the latest newsletter from the database"""
