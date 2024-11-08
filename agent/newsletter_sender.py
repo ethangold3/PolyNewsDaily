@@ -24,8 +24,10 @@ class Article(BaseModel):
 
 class NewsletterSender:
     def __init__(self, template_path: str = "newsletter_template.html"):
-        self.template_path = Path(template_path)
-        self.logo_path = Path("PNDlogo.jpeg")
+        # Get the directory where newsletter_sender.py is located
+        current_dir = Path(__file__).parent
+        self.template_path = current_dir / template_path
+        self.logo_path = current_dir / "PNDlogo.jpeg"
         self.load_template()
         self.load_logo()
         self.db_conn = None
