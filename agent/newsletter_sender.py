@@ -36,7 +36,6 @@ class NewsletterSender:
                        groups: Dict[str, List[int]] = None):
         """Save the newsletter content to the database"""
         try:
-
             conn = get_db_connection()
             cur = conn.cursor()
             
