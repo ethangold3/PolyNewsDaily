@@ -76,8 +76,8 @@ def setup_database():
         cur.execute('''
         CREATE TABLE IF NOT EXISTS subscribers (
             id SERIAL PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            email VARCHAR(120) UNIQUE NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
             feedback TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -91,7 +91,7 @@ def setup_database():
             subheader TEXT,
             blurb TEXT,
             score FLOAT,
-            ticker VARCHAR(10)
+            ticker VARCHAR(255)
 );
         
         ''')
