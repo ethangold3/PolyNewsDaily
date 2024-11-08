@@ -129,7 +129,7 @@ class NewsletterSender:
                 group_name = group_row[0]
                 cur.execute("""
                     SELECT article_id FROM group_articles 
-                    WHERE group_name = ?
+                    WHERE group_name = %s
                 """, (group_name,))
                 article_ids = [row[0] for row in cur.fetchall()]
                 groups[group_name] = article_ids
@@ -350,7 +350,8 @@ class NewsletterSender:
             return False
             
         try:
-            self.send_newsletter(smtp_config, [email], latest[0], latest[1])
+            articles, groups = latest
+            self.send_newsletter(smtp_config, [email], articles, groups)
             
         except Exception as e:
             print(f"Error sending latest newsletter to {email}: {str(e)}")
