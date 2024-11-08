@@ -70,10 +70,6 @@ class NewsletterSender:
             cur.execute("SELECT COUNT(*) FROM group_articles")
             group_articles_count = cur.fetchone()[0]
             
-            conn.commit()
-            cur.close()
-            conn.close()
-            
             print(f"""
     Database summary:
     - Articles: {final_article_count}
