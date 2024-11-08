@@ -21,7 +21,6 @@ class Article(BaseModel):
     blurb: str
     score: float
     ticker: str
-    links: List[str]
 
 class NewsletterSender:
     def __init__(self, template_path: str = "newsletter_template.html"):
@@ -31,7 +30,8 @@ class NewsletterSender:
         self.load_logo()
         self.db_conn = None
 
-    def save_newsletter_to_db(self, html_content: str, subject: str):
+    def save_newsletter_to_db(self, articles: List[Article], 
+                       groups: Dict[str, List[int]] = None):
         """Save the newsletter content to the database"""
         try:
 
@@ -39,13 +39,29 @@ class NewsletterSender:
             cur = conn.cursor()
             
             # First, delete any existing newsletters
-            cur.execute("DELETE FROM latest_newsletter")
+            cur.execute("DELETE FROM group_articles")
+            # cur.execute("DELETE FROM article_links")
+            cur.execute("DELETE FROM articles")
+            cur.execute("DELETE FROM groups")
             
-            # Insert the new newsletter
-            cur.execute("""
-                INSERT INTO latest_newsletter (html_content, subject)
-                VALUES (%s, %s)
-            """, (html_content, subject))
+            for article in articles:
+                cur.execute("""
+                    INSERT INTO articles (id, headline, subheader, blurb, score, ticker)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (article.id, article.headline, article.subheader, 
+                     article.blurb, article.score, article.ticker))
+                
+
+            for group_name, article_ids in groups.items():
+                cur.execute("INSERT INTO groups (name) VALUES (?)", (group_name,))
+                
+                for article_id in article_ids:
+                    cur.execute("""
+                        INSERT INTO group_articles (group_name, article_id)
+                        VALUES (?, ?)
+                    """, (group_name, article_id))
+            
+            conn.commit()
             
             conn.commit()
             cur.close()
@@ -54,30 +70,44 @@ class NewsletterSender:
         except Exception as e:
             print(f"Error saving newsletter to database: {str(e)}")
 
-    def get_latest_newsletter(self):
+    def retrieve_data(self) -> tuple[List[Article], Dict[str, List[int]]]:
         """Retrieve the latest newsletter from the database"""
         try:
             conn = get_db_connection()
             cur = conn.cursor()
+            articles = []
+            cur.execute("SELECT id, headline, subheader, blurb, score, ticker FROM articles")
+            article_rows = cur.fetchall()
             
-            cur.execute("""
-                SELECT html_content, subject, sent_date 
-                FROM latest_newsletter 
-                ORDER BY sent_date DESC 
-                LIMIT 1
-            """)
+            for row in article_rows:
+                # Get links for this article
+                
+                article = Article(
+                    id=row[0],
+                    headline=row[1],
+                    subheader=row[2],
+                    blurb=row[3],
+                    score=row[4],
+                    ticker=row[5]
+                )
+                articles.append(article)
             
-            result = cur.fetchone()
-            cur.close()
-            conn.close()
+            # Retrieve groups and their article IDs
+            groups = {}
+            cur.execute("SELECT name FROM groups")
+            group_rows = cur.fetchall()
             
-            if result:
-                return {
-                    'html_content': result[0],
-                    'subject': result[1],
-                    'sent_date': result[2]
-                }
-            return None
+            for group_row in group_rows:
+                group_name = group_row[0]
+                cur.execute("""
+                    SELECT article_id FROM group_articles 
+                    WHERE group_name = ?
+                """, (group_name,))
+                article_ids = [row[0] for row in cur.fetchall()]
+                groups[group_name] = article_ids
+            
+            return articles, groups
+
         except Exception as e:
             print(f"Error retrieving newsletter from database: {str(e)}")
             return None
@@ -234,7 +264,6 @@ class NewsletterSender:
             )
 
             subject = "📈 Today's Prediction Market Powered News"
-            self.save_newsletter_to_db(html_content, subject)
 
             results = {'successful': [], 'failed': []}
             batch_size = 50
@@ -293,32 +322,7 @@ class NewsletterSender:
             return False
             
         try:
-            server = smtplib.SMTP(smtp_config['host'], smtp_config['port'])
-            server.starttls()
-            server.login(smtp_config['auth']['user'], smtp_config['auth']['pass'])
-            
-            msg = MIMEMultipart('related')
-            msg_alternative = MIMEMultipart('alternative')
-            msg.attach(msg_alternative)
-            
-            msg['Subject'] = latest['subject']
-            msg['From'] = smtp_config['from']
-            msg['To'] = email
-            
-            # Attach HTML content
-            msg_alternative.attach(MIMEText(latest['html_content'], 'html'))
-            
-            # Attach logo image
-            img = MIMEImage(self.logo_data)
-            img.add_header('Content-ID', '<logo>')
-            img.add_header('Content-Disposition', 'inline; filename="PNDlogo.jpeg"')
-            img.add_header('Content-Type', 'image/jpeg; name="PNDlogo.jpeg"')
-            msg.attach(img)
-            
-            server.send_message(msg)
-            server.quit()
-            print(f"Successfully sent latest newsletter to: {email}")
-            return True
+            self.send_newsletter(smtp_config, [email], latest[0], latest[1])
             
         except Exception as e:
             print(f"Error sending latest newsletter to {email}: {str(e)}")

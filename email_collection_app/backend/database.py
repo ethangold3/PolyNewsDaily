@@ -85,13 +85,32 @@ def setup_database():
         print("\nDatabase setup complete - subscribers table created/verified.")
 
         cur.execute('''
-        CREATE TABLE IF NOT EXISTS latest_newsletter (
-            id SERIAL PRIMARY KEY,
-            html_content TEXT NOT NULL,
-            sent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            subject VARCHAR(255) NOT NULL
+        CREATE TABLE articles (
+            id INTEGER PRIMARY KEY,
+            headline TEXT,
+            subheader TEXT,
+            blurb TEXT,
+            score FLOAT,
+            ticker VARCHAR(10)
+);
         )
         ''')
+        cur.execute('''
+        CREATE TABLE groups (
+            name VARCHAR(255) PRIMARY KEY
+        );
+        ''')
+
+        cur.execute('''
+        CREATE TABLE group_articles (
+            group_name VARCHAR(255),
+            article_id INTEGER,
+            FOREIGN KEY (group_name) REFERENCES groups(name) ON DELETE CASCADE,
+            FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
+        );
+        ''')
+
+
         print("\nDatabase setup complete - latest_newsletter table created/verified.")
         
         
