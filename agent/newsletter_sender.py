@@ -72,7 +72,7 @@ class NewsletterSender:
         except Exception as e:
             print(f"Error saving newsletter to database: {str(e)}")
 
-    def retrieve_data(self) -> tuple[List[Article], Dict[str, List[int]]]:
+    def get_latest_newsletter(self) -> tuple[List[Article], Dict[str, List[int]]]:
         """Retrieve the latest newsletter from the database"""
         try:
             conn = get_db_connection()
