@@ -42,8 +42,8 @@ function App() {
             </div>
             <div className="prose">
               <p>
-                Poly News Daily provides probabilistic insights into current events using prediction market data. 
-                We analyze market probabilities to give you a quantified perspective on news and future events.
+                A Daily newsletter built from prediction markets straight into your inbox. 
+                Make your news smarter, probabilistic, and less biased.
               </p>
               <div className="mt-4">
                 <h3 className="text-lg font-semibold">Contact</h3>
@@ -85,7 +85,7 @@ function App() {
               Poly News Daily
             </h1>
             <p className="mt-3 max-w-md mx-auto text-xl text-white sm:text-2xl md:mt-5 md:max-w-3xl">
-              Get probabilistic news insights powered by prediction markets
+              The news of the future, straight into your inbox each morning.
             </p>
           </div>
 
@@ -103,7 +103,7 @@ function App() {
                 Example Daily Newsletter
               </h2>
               <p className="text-gray-600 text-center mb-8">
-                Here's what you'll receive in your inbox every day
+      
               </p>
               
               <div className="grid md:grid-cols-2 gap-8">
