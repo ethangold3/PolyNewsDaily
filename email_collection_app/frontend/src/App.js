@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SubscriptionForm from './components/Subscriptionform';
+import UnsubscribeForm from './components/UnsubscribeForm';
 import logo from './logo.jpeg';
 import screenshot1 from './screenshot1.jpeg';  // Add your actual image path
 import screenshot2 from './screenshot2.jpeg';
@@ -8,6 +9,7 @@ import screenshot2 from './screenshot2.jpeg';
 
 function App() {
   const [showAbout, setShowAbout] = useState(false);
+  const [showUnsubscribe, setShowUnsubscribe] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Handle scroll effects
@@ -42,15 +44,17 @@ function App() {
           </span>
         </div>
         
-        <button 
-          onClick={() => setShowAbout(true)}
-          className="relative px-6 py-2 group"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg blur opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative px-6 py-2 bg-black rounded-lg text-white transform transition-all duration-300 group-hover:scale-105">
-            About
-          </div>
-        </button>
+        <div className="flex space-x-4">
+          <button 
+            onClick={() => setShowAbout(true)}
+            className="relative px-4 py-2 group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg blur opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative px-4 py-2 bg-black rounded-lg text-white transform transition-all duration-300 group-hover:scale-105">
+              About
+            </div>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -97,6 +101,26 @@ function App() {
   </div>
 )}
 
+{/* Unsubscribe Modal */}
+{showUnsubscribe && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowUnsubscribe(false)}>
+    <div 
+      className="bg-white/90 backdrop-blur-md rounded-2xl max-w-md w-full transform transition-all duration-300 scale-100 opacity-100" 
+      onClick={e => e.stopPropagation()}
+    >
+      <UnsubscribeForm />
+      <div className="flex justify-center pb-6">
+        <button 
+          onClick={() => setShowUnsubscribe(false)}
+          className="text-gray-500 hover:text-gray-700 text-sm"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 {/* Main content area with improved spacing and animations */}
 <div className="pt-24 relative min-h-screen z-0"> {/* Added z-0 */}
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"> {/* Added relative and z-10 */}
@@ -121,54 +145,67 @@ function App() {
       </div>
     </div>
 
-                    {/* Newsletter Examples Section */}
-                    <div className="max-w-4xl mx-auto mt-24">
-                    <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 transform transition-all duration-500 hover:scale-[1.02]">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                Example Daily Newsletter
-              </h2>
-              <p className="text-gray-600 text-center mb-8">
+    {/* Footer with unsubscribe option */}
+    <div className="mt-16 text-center">
+      <p className="text-blue-100 text-sm opacity-70">
+        Don't want to receive our newsletter anymore?{' '}
+        <button 
+          onClick={() => setShowUnsubscribe(true)}
+          className="text-red-300 hover:text-red-200 underline focus:outline-none"
+        >
+          Unsubscribe here
+        </button>
+      </p>
+    </div>
+
+    {/* Newsletter Examples Section */}
+    <div className="max-w-4xl mx-auto mt-24">
+    <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 transform transition-all duration-500 hover:scale-[1.02]">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+        Example Daily Newsletter
+      </h2>
+      <p className="text-gray-600 text-center mb-8">
       
-              </p>
-              
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="relative group">
-                  <div className="overflow-hidden rounded-lg shadow-lg">
-                    <img 
-                      src={screenshot1}
-                      alt="Newsletter Example 1"
-                      className="w-full h-auto transform transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <p className="text-sm text-gray-600">More informed news</p>
-                  </div>
-                </div>
+      </p>
+      
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="relative group">
+          <div className="overflow-hidden rounded-lg shadow-lg">
+            <img 
+              src={screenshot1}
+              alt="Newsletter Example 1"
+              className="w-full h-auto transform transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-600">More informed news</p>
+          </div>
+        </div>
 
-                <div className="relative group">
-                  <div className="overflow-hidden rounded-lg shadow-lg">
-                    <img 
-                      src={screenshot2}
-                      alt="Newsletter Example 2"
-                      className="w-full h-auto transform transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <p className="text-sm text-gray-600">A probabilistic view of current events</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 text-center">
-                <p className="text-gray-700">
-                  Subscribe above to receive daily insights directly in your inbox!
-                </p>
-              </div>
-            </div>
+        <div className="relative group">
+          <div className="overflow-hidden rounded-lg shadow-lg">
+            <img 
+              src={screenshot2}
+              alt="Newsletter Example 2"
+              className="w-full h-auto transform transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-600">A probabilistic view of current events</p>
           </div>
         </div>
       </div>
+
+      <div className="mt-8 text-center">
+        <p className="text-gray-700">
+          Subscribe above to receive daily insights directly in your inbox!
+        </p>
+      </div>
     </div>
+  </div>
+</div>
+  </div>
+</div>
   );
 }
 

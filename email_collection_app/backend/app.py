@@ -20,11 +20,15 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__, static_folder='../frontend/build')
 CORS(app)
 
-try:
-    setup_database()
-    logger.info("Database initialization complete!")
-except Exception as e:
-    logger.error(f"Error during database initialization: {str(e)}")
+# Only run database setup during initialization on Heroku, not for local development
+if os.environ.get('HEROKU_DEPLOYMENT', False):
+    try:
+        setup_database()
+        logger.info("Database initialization complete!")
+    except Exception as e:
+        logger.error(f"Error during database initialization: {str(e)}")
+else:
+    logger.info("Skipping database setup for local development")
 
 
 def is_valid_email(email):
@@ -138,6 +142,64 @@ def get_subscribers():
         cur.close()
         conn.close()
 
+@app.route('/api/unsubscribe', methods=['POST'])
+def unsubscribe():
+    logger.info("Received unsubscribe request")
+    try:
+        data = request.json
+        logger.debug(f"Received unsubscribe data: {data}")
+        
+        # Input validation
+        if 'email' not in data:
+            logger.warning("Missing email field")
+            return jsonify({"message": "Email is required"}), 400
+        
+        # Sanitize and validate email
+        sanitized_email = sanitize_input(data['email'])
+        if not sanitized_email or not is_valid_email(sanitized_email):
+            logger.warning(f"Invalid email address: {data['email']}")
+            return jsonify({"message": "Invalid email address"}), 400
+        
+        logger.info(f"Attempting database connection for unsubscribe")
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        try:
+            logger.debug("Executing DELETE query")
+            cur.execute(
+                """
+                DELETE FROM subscribers
+                WHERE email = %s
+                RETURNING id
+                """,
+                (sanitized_email,)
+            )
+            
+            result = cur.fetchone()
+            if result:
+                subscriber_id = result[0]
+                logger.info(f"Successfully unsubscribed user with ID: {subscriber_id}")
+                conn.commit()
+                return jsonify({"message": "You have been successfully unsubscribed."}), 200
+            else:
+                logger.warning(f"Email not found: {sanitized_email}")
+                return jsonify({"message": "Email not found in our subscriber list."}), 404
+            
+        except psycopg2.Error as e:
+            conn.rollback()
+            logger.error(f"Database error during unsubscribe: {str(e)}")
+            logger.error(f"Error details: {e.diag.message_detail if hasattr(e, 'diag') else 'No details available'}")
+            return jsonify({"message": f"Database error: {str(e)}"}), 500
+            
+        finally:
+            cur.close()
+            conn.close()
+            logger.info("Database connection closed")
+            
+    except Exception as e:
+        logger.error("Unexpected error in unsubscribe endpoint")
+        logger.error(traceback.format_exc())
+        return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
 
 # Add this with your other routes
 @app.route('/api/send-latest', methods=['POST'])
@@ -178,5 +240,6 @@ def send_latest_newsletter():
         return jsonify({'error': 'Server error'}), 500
 
 if __name__ == '__main__':
-    setup_database()
+    # Skip database setup for local testing to avoid refreshing the database
+    # setup_database()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
