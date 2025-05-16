@@ -20,6 +20,17 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__, static_folder='../frontend/build')
 CORS(app)
 
+# Add security headers to all responses
+@app.after_request
+def add_security_headers(response):
+    # Content Security Policy to restrict where resources can be loaded from
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; object-src 'none';"
+    # Prevent browsers from MIME-sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    # Prevents the browser from rendering the page if it detects a potential XSS attack
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
+
 # Only run database setup during initialization on Heroku, not for local development
 if os.environ.get('HEROKU_DEPLOYMENT', False):
     try:
@@ -215,16 +226,20 @@ def send_latest_newsletter():
         newsletter_sender = NewsletterSender()
         
         # Get SMTP config from environment variables
+        smtp_pass = os.getenv('SMTP_PASS')
+        if not smtp_pass:
+            logger.error("SMTP_PASS environment variable not found")
+            return jsonify({'error': 'Server configuration error'}), 500
 
         smtp_config = {
             "host": "smtp.gmail.com",
             "port": 587,
             "secure": True,
             "auth": {
-                "user": "polynewsdailynewsletter@gmail.com",  # Your full Gmail address
-                'pass': os.getenv('SMTP_PASS')   # The 16-character app password you generated
+                "user": "polynewsdailynewsletter@gmail.com",
+                'pass': smtp_pass
             },
-            "from": '"PolyNewsDaily Update" <polynewsdailynewsletter@gmail.com>'  # Use your Gmail address here too
+            "from": '"PolyNewsDaily Update" <polynewsdailynewsletter@gmail.com>'
         }
 
         # Send the latest newsletter
@@ -236,7 +251,8 @@ def send_latest_newsletter():
             return jsonify({'error': 'Failed to send latest newsletter'}), 500
             
     except Exception as e:
-        print(f"Error sending latest newsletter: {str(e)}")
+        logger.error(f"Error sending latest newsletter: {str(e)}")
+        # Don't include the actual error message in the response to avoid leaking sensitive info
         return jsonify({'error': 'Server error'}), 500
 
 if __name__ == '__main__':

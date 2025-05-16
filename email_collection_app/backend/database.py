@@ -14,8 +14,8 @@ def get_db_connection():
     
     # Print the URL (with password hidden) for debugging
     parsed_url = urlparse(DATABASE_URL)
-    safe_url = f"{parsed_url.scheme}://{parsed_url.username}@{parsed_url.hostname}:{parsed_url.port}{parsed_url.path}"
-    print(f"Connecting to: {safe_url}")
+    # Only log that we're connecting, not the actual connection string
+    print(f"Connecting to database...")
     
     # Heroku specific: Fix connection string if necessary
     if DATABASE_URL.startswith('postgres://'):
