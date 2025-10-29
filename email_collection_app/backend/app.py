@@ -9,7 +9,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import logging
 import traceback
-import psycopg2
+import psycopg
 from flask import jsonify, request
 
 # Set up logging
@@ -114,7 +114,7 @@ def submit():
             conn.commit()
             return jsonify({"message": "Thank you for subscribing!"}), 200
             
-        except psycopg2.Error as e:
+        except psycopg.Error as e:
             conn.rollback()
             logger.error(f"Database error: {str(e)}")
             logger.error(f"Error details: {e.diag.message_detail if hasattr(e, 'diag') else 'No details available'}")
@@ -242,7 +242,7 @@ def unsubscribe():
                 logger.warning(f"Email not found: {sanitized_email}")
                 return jsonify({"message": "Email not found in our subscriber list."}), 404
             
-        except psycopg2.Error as e:
+        except psycopg.Error as e:
             conn.rollback()
             logger.error(f"Database error during unsubscribe: {str(e)}")
             logger.error(f"Error details: {e.diag.message_detail if hasattr(e, 'diag') else 'No details available'}")

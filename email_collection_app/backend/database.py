@@ -1,8 +1,7 @@
 # database.py
 import os
 from urllib.parse import urlparse
-import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import psycopg
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -22,9 +21,9 @@ def get_db_connection():
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     
     try:
-        conn = psycopg2.connect(DATABASE_URL)
+        conn = psycopg.connect(DATABASE_URL)
         return conn
-    except psycopg2.Error as e:
+    except psycopg.Error as e:
         print(f"Unable to connect to the database: {e}")
         raise
 
@@ -68,7 +67,7 @@ def test_connection():
 def setup_database():
     """Setup database tables"""
     conn = get_db_connection()
-    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    conn.autocommit = True
     cur = conn.cursor()
     
     try:
