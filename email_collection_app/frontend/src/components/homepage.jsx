@@ -1,10 +1,5 @@
 import React from "react";
 
-///////////////////////////////////////
-// Helpers / sample shapes
-///////////////////////////////////////
-
-// fallback image if something doesn't have an image
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80";
 
@@ -18,11 +13,10 @@ function formatNowTime() {
   return `${hour12}:${mm}${suffix}`;
 }
 
-///////////////////////////////////////
-// Header
-///////////////////////////////////////
-
-function SiteHeader() {
+/* ─────────────────────────────
+   Header (now dynamic categories)
+   ───────────────────────────── */
+function SiteHeader({ categories }) {
   return (
     <header className="bg-[#0b0f0c] text-white font-sans border-b border-white/10">
       {/* Top Row: Brand + Search */}
@@ -47,7 +41,7 @@ function SiteHeader() {
             </button>
           </div>
 
-          {/* Sign in / Sign up row (you asked for this under the search bar) */}
+          {/* Sign in / Sign up row */}
           <div className="flex flex-row flex-wrap gap-x-3 gap-y-1 text-[11px] leading-tight uppercase font-semibold tracking-wide text-white/70 mt-2 justify-end lg:justify-end">
             <button className="hover:text-white">Sign in</button>
             <span className="text-white/40">/</span>
@@ -59,21 +53,11 @@ function SiteHeader() {
       {/* Nav Row */}
       <div className="bg-[#1c1c1a] border-t border-white/10">
         <div className="max-w-screen-xl mx-auto px-4 py-3 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          {/* Category nav */}
+          {/* Dynamic category nav */}
           <nav className="flex flex-wrap text-[12px] leading-none font-semibold tracking-wide uppercase text-white">
-            {[
-              "Politics",
-              "World",
-              "Economy",
-              "Science & Tech",
-              "Business",
-              "Travel",
-              "Climate",
-              "Lifestyle",
-              "Food",
-              "Sports",
-            ].map((label) => {
-              const active = label === "World"; // in your screenshot, "World" tab is green
+            {categories.map((label, idx) => {
+              // first category gets the green highlight style like "World" did before
+              const active = idx === 0;
               return (
                 <a
                   key={label}
@@ -103,10 +87,9 @@ function SiteHeader() {
   );
 }
 
-///////////////////////////////////////
-// Hero / Top Headlines
-///////////////////////////////////////
-
+/* ─────────────────────────────
+   Hero / Top Headlines (left hero + right column)
+   ───────────────────────────── */
 function HeroSection({ topHeadlines }) {
   const hero = topHeadlines[0];
   const support1 = topHeadlines[1];
@@ -117,19 +100,19 @@ function HeroSection({ topHeadlines }) {
     <section className="bg-[#efefe7] text-[#1a1a1a] border-b border-black/10">
       <div className="max-w-screen-xl mx-auto px-4 py-6">
         <div className="grid lg:grid-cols-3 gap-4">
-          {/* LEFT: main hero story */}
+          {/* LEFT: Hero story */}
           <article className="lg:col-span-2 border border-[#d4d4c4] bg-black relative rounded-sm overflow-hidden">
-            {/* image */}
+            {/* Hero image */}
             <img
               src={hero?.image || FALLBACK_IMG}
               alt={hero?.title || "headline image"}
               className="absolute inset-0 w-full h-full object-cover object-center"
             />
-            {/* dark overlay */}
+            {/* dark gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/0" />
-            {/* text content */}
+            {/* content overlay */}
             <div className="relative p-4 sm:p-6 md:p-8 flex flex-col justify-end min-h-[260px]">
-              {/* carousel dots */}
+              {/* Carousel dots top-right */}
               <div className="absolute top-4 right-4 flex gap-1">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <span
@@ -148,7 +131,7 @@ function HeroSection({ topHeadlines }) {
               </h2>
 
               <div className="mt-4 flex flex-wrap text-[11px] text-white/80 font-sans gap-x-2 gap-y-1">
-                <span>By {hero?.author || "Ginny Dennis"}</span>
+                <span>By {hero?.author || "PolyNewsDaily Desk"}</span>
                 <span className="opacity-50">•</span>
                 <span>{hero?.datetime || "Just now"}</span>
               </div>
@@ -157,18 +140,17 @@ function HeroSection({ topHeadlines }) {
 
           {/* RIGHT COLUMN */}
           <aside className="flex flex-col gap-4">
-            {/* Spy balloon style block */}
+            {/* support1 block */}
             <div className="bg-[#1a1a1a] text-white border border-[#2a2a2a] rounded-sm overflow-hidden flex flex-col sm:flex-row">
-              {/* text half */}
+              {/* Text column */}
               <div className="p-4 text-[13px] leading-relaxed font-serif text-white/80 sm:w-1/2">
                 <p className="whitespace-pre-line">
                   {support1?.summary ||
-                    `Secretary of State Antony J. Blinken on Friday canceled a weekend
-trip to Beijing after a Chinese spy balloon was sighted above Montana, igniting a frenzy of media coverage...`}
+                    `Secretary of State canceled a weekend trip to Beijing after a Chinese spy balloon was sighted above Montana...`}
                 </p>
               </div>
 
-              {/* image half */}
+              {/* Image + overlay headline */}
               <div className="relative sm:w-1/2 min-h-[160px] bg-black">
                 <img
                   src={support1?.image || FALLBACK_IMG}
@@ -185,9 +167,9 @@ trip to Beijing after a Chinese spy balloon was sighted above Montana, igniting 
               </div>
             </div>
 
-            {/* bottom row (promo tile + greener airports) */}
+            {/* bottom row: promo tile + airports story */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* promo mini tile */}
+              {/* promo tile */}
               <div className="bg-[#2f4157] text-white rounded-sm border border-[#2a3345] flex flex-col justify-between p-4 sm:col-span-1 min-h-[140px]">
                 <div className="font-serif font-bold text-[15px] leading-snug whitespace-pre-wrap">
                   {promoTile?.title || "Balloon’s\nJourney"}
@@ -198,7 +180,7 @@ trip to Beijing after a Chinese spy balloon was sighted above Montana, igniting 
                 </div>
               </div>
 
-              {/* airports story preview */}
+              {/* airports story */}
               <div className="bg-[#f8f8f0] border border-[#d4d4c4] rounded-sm p-4 sm:col-span-2 flex flex-col">
                 <h3 className="font-serif font-bold text-[16px] leading-snug text-[#1a1a1a]">
                   {support2?.title ||
@@ -206,14 +188,14 @@ trip to Beijing after a Chinese spy balloon was sighted above Montana, igniting 
                 </h3>
 
                 <div className="mt-2 flex flex-wrap text-[11px] leading-none font-sans text-[#6d6d5a] gap-x-2 gap-y-1">
-                  <span>By {support2?.author || "Ginny Dennis"}</span>
+                  <span>By {support2?.author || "PolyNewsDaily Desk"}</span>
                   <span className="opacity-50">•</span>
                   <span>{support2?.datetime || "Feb. 4, 2025"}</span>
                 </div>
 
                 <div className="mt-3 border-t-2 border-[#2a6d61] pt-3 text-[13px] leading-relaxed font-serif text-[#2a6d61]">
                   {support2?.summary ||
-                    "The FAA says new descent profiles will cut fuel burn, emissions and noise for communities under flight paths..."}
+                    "New descent profiles will cut fuel burn, emissions and noise for communities under flight paths..."}
                 </div>
               </div>
             </div>
@@ -224,10 +206,9 @@ trip to Beijing after a Chinese spy balloon was sighted above Montana, igniting 
   );
 }
 
-///////////////////////////////////////
-// Latest News cards
-///////////////////////////////////////
-
+/* ─────────────────────────────
+   Latest News cards
+   ───────────────────────────── */
 function NewsImageCard({ article }) {
   return (
     <article className="bg-black border border-[#d4d4c4] rounded-sm overflow-hidden relative">
@@ -277,14 +258,12 @@ function NewsTextCard({ article }) {
   );
 }
 
-///////////////////////////////////////
-// Trending Sidebar
-///////////////////////////////////////
-
+/* ─────────────────────────────
+   Trending sidebar
+   ───────────────────────────── */
 function TrendingItem({ article }) {
   return (
     <div className="py-4 flex flex-row gap-4">
-      {/* thumbnail */}
       <div className="flex-shrink-0 w-[88px] h-[66px] bg-[#1f3f89] overflow-hidden border border-[#d4d4c4]">
         {article.image ? (
           <img
@@ -297,7 +276,6 @@ function TrendingItem({ article }) {
         )}
       </div>
 
-      {/* text */}
       <div className="flex flex-col flex-1 min-w-0">
         <div className="font-serif text-[15px] font-semibold text-[#1a1a1a] leading-snug">
           {article.title}
@@ -339,10 +317,9 @@ function TrendingSidebarWithData({ trending }) {
   );
 }
 
-///////////////////////////////////////
-// Footer
-///////////////////////////////////////
-
+/* ─────────────────────────────
+   Footer
+   ───────────────────────────── */
 function SiteFooter() {
   return (
     <footer className="bg-[#0b0f0c] text-white font-sans text-[11px] leading-relaxed mt-12 border-t border-white/10">
@@ -399,17 +376,15 @@ function SiteFooter() {
   );
 }
 
-///////////////////////////////////////
-// Main page component (default export)
-// This is what App.js will render.
-///////////////////////////////////////
-
-export default function HomePage({ data }) {
+/* ─────────────────────────────
+   Page component
+   ───────────────────────────── */
+export default function HomePage({ data, categories }) {
   const { topHeadlines, latestNews, trending } = data;
 
   return (
     <main className="bg-[#efefe7] text-[#1a1a1a] min-h-screen flex flex-col">
-      <SiteHeader />
+      <SiteHeader categories={categories} />
       <HeroSection topHeadlines={topHeadlines} />
 
       {/* Latest News + Trending */}
@@ -423,7 +398,7 @@ export default function HomePage({ data }) {
             <div className="flex-1 border-b border-[#1a1a1a]" />
           </div>
 
-          {/* Content grid: latest left, trending right */}
+          {/* Content grid */}
           <div className="mt-6 grid lg:grid-cols-[2fr_1fr] gap-6">
             {/* LEFT feed */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

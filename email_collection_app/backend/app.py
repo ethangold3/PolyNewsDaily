@@ -7,7 +7,6 @@ from database import get_db_connection, setup_database
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from agent.newsletter_sender import NewsletterSender
 import logging
 import traceback
 import psycopg2
@@ -153,6 +152,53 @@ def get_subscribers():
         cur.close()
         conn.close()
 
+@app.route('/api/latest', methods=['GET'])
+def get_latest_newsletter():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Fetch articles
+        cur.execute("""
+            SELECT id, headline, subheader, blurb, score, ticker
+            FROM articles
+            ORDER BY id
+        """)
+        rows = cur.fetchall()
+        articles = [
+            {
+                "id": r[0],
+                "headline": r[1],
+                "subheader": r[2],
+                "blurb": r[3],
+                "score": float(r[4]) if r[4] is not None else None,
+                "ticker": r[5],
+            }
+            for r in rows
+        ]
+
+        # Fetch groups mapping
+        cur.execute("SELECT name FROM groups ORDER BY name")
+        group_rows = cur.fetchall()
+        groups = {}
+        for (group_name,) in group_rows:
+            cur.execute(
+                """
+                SELECT article_id FROM group_articles
+                WHERE group_name = %s
+                ORDER BY article_id
+                """,
+                (group_name,),
+            )
+            groups[group_name] = [r[0] for r in cur.fetchall()]
+
+        return jsonify({"articles": articles, "groups": groups}), 200
+    except Exception as e:
+        logger.error(f"Error fetching latest newsletter: {str(e)}")
+        return jsonify({"error": "An error occurred."}), 500
+    finally:
+        cur.close()
+        conn.close()
+
 @app.route('/api/unsubscribe', methods=['POST'])
 def unsubscribe():
     logger.info("Received unsubscribe request")
@@ -216,6 +262,8 @@ def unsubscribe():
 @app.route('/api/send-latest', methods=['POST'])
 def send_latest_newsletter():
     try:
+        # Lazy import to avoid requiring Pydantic at app startup
+        from agent.newsletter_sender import NewsletterSender
         data = request.get_json()
         email = data.get('email')
         
