@@ -1,13 +1,46 @@
-.env
+# Python ignores
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+fresh_venv/
+*.venv
+
+# Environment files
+.env
+.env.*
+!.env.example  # If you have a template
+
+# OS files
+.DS_Store
+
+# Node/Frontend
+node_modules/
+npm-debug.log
+
+# Logs and temp
+*.log
+*.csv  # Backups
+*.bak
+
+# Jupyter/Notebooks
+.ipynb_checkpoints/
+
+# Database/Backend temp scripts (optional, remove if you want to track them)
+backend/*_column.py
+backend/*_table.py
+backend/export_*.py
+
+# Other project-specific
 email_collection_app/server/venv
 email_collection_app/frontend/node_modules
+PolyNewsDaily/.venv
+PolyNewsDaily/venv/
 
-venv/
-*.pyc
-__pycache__/
-.env
-.DS_Store
-email_collection_app/frontend/node_modules/
-*.log
+# Temp backups and scripts
+*backup*.txt
+*backup*.csv

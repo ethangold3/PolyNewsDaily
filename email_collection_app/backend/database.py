@@ -85,13 +85,14 @@ def setup_database():
 
         cur.execute('''
         CREATE TABLE IF NOT EXISTS articles (
-            id INTEGER PRIMARY KEY,
-            headline TEXT,
+            id SERIAL PRIMARY KEY,
+            headline TEXT NOT NULL,
             subheader TEXT,
-            blurb TEXT,
-            score FLOAT,
-            ticker VARCHAR(255)
-);
+            blurb TEXT NOT NULL,
+            image_url TEXT,
+            score DECIMAL,
+            ticker TEXT
+        );
         
         ''')
         cur.execute('''

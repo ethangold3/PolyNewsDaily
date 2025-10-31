@@ -27,3 +27,6 @@ Werkzeug==2.0.1
 flask-cors==3.0.10
 gunicorn==20.1.0
 email-validator
+pydantic==2.12.3
+pydantic-core==2.41.4
+numpy~=1.26.0

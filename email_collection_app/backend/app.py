@@ -16,7 +16,7 @@ from flask import jsonify, request
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__, static_folder='../frontend/build')
+app = Flask(__name__)
 CORS(app)
 
 # Add security headers to all responses
@@ -60,16 +60,11 @@ def sanitize_input(email):
         
     return email
 
+# Move all these API routes up here, right after app creation and before the / and /<path:path>
+
 @app.route('/')
-def index():
-    return send_from_directory('../frontend/build', 'index.html')
-
-@app.route('/<path:path>')
-def serve_static(path):
-    if os.path.exists(os.path.join('../frontend/build', path)):
-        return send_from_directory('../frontend/build', path)
-    return send_from_directory('../frontend/build', 'index.html')
-
+def health_check():
+    return "PolyNewsDaily API is running!", 200
 
 @app.route('/api/submit', methods=['POST'])
 def submit():
@@ -160,6 +155,7 @@ def get_latest_newsletter():
         # Fetch articles
         cur.execute("""
             SELECT id, headline, subheader, blurb, score, ticker
+            , image_url
             FROM articles
             ORDER BY id
         """)
@@ -172,6 +168,7 @@ def get_latest_newsletter():
                 "blurb": r[3],
                 "score": float(r[4]) if r[4] is not None else None,
                 "ticker": r[5],
+                "image_url": r[6],
             }
             for r in rows
         ]
@@ -194,6 +191,42 @@ def get_latest_newsletter():
         return jsonify({"articles": articles, "groups": groups}), 200
     except Exception as e:
         logger.error(f"Error fetching latest newsletter: {str(e)}")
+        return jsonify({"error": "An error occurred."}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+
+@app.route('/api/articles', methods=['GET'])
+def get_articles():
+    """Return only the list of articles without groups."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT id, headline, subheader, blurb, score, ticker
+            , image_url
+            FROM articles
+            ORDER BY id
+            """
+        )
+        rows = cur.fetchall()
+        articles = [
+            {
+                "id": r[0],
+                "headline": r[1],
+                "subheader": r[2],
+                "blurb": r[3],
+                "score": float(r[4]) if r[4] is not None else None,
+                "ticker": r[5],
+                "image_url": r[6],
+            }
+            for r in rows
+        ]
+        return jsonify({"articles": articles}), 200
+    except Exception as e:
+        logger.error(f"Error fetching articles: {str(e)}")
         return jsonify({"error": "An error occurred."}), 500
     finally:
         cur.close()
@@ -306,4 +339,4 @@ def send_latest_newsletter():
 if __name__ == '__main__':
     # Skip database setup for local testing to avoid refreshing the database
     # setup_database()
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))

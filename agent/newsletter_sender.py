@@ -47,10 +47,9 @@ class NewsletterSender:
             
             for article in articles:
                 cur.execute("""
-                    INSERT INTO articles (id, headline, subheader, blurb, score, ticker)
+                    INSERT INTO articles (headline, subheader, blurb, score, ticker, image_url)
                     VALUES (%s, %s, %s, %s, %s, %s)
-                """, (article.id, article.headline, article.subheader, 
-                     article.blurb, article.score, article.ticker))
+                """, (article.headline, article.subheader, article.blurb, article.score, article.ticker, article.image_url or None))
                 
 
             for group_name, article_ids in groups.items():
@@ -104,7 +103,11 @@ class NewsletterSender:
             conn = get_db_connection()
             cur = conn.cursor()
             articles = []
-            cur.execute("SELECT id, headline, subheader, blurb, score, ticker FROM articles")
+            cur.execute("""
+                SELECT id, headline, subheader, blurb, score, ticker, image_url
+                FROM articles
+                ORDER BY id
+            """)
             article_rows = cur.fetchall()
             
             for row in article_rows:
@@ -116,7 +119,8 @@ class NewsletterSender:
                     subheader=row[2],
                     blurb=row[3],
                     score=row[4],
-                    ticker=row[5]
+                    ticker=row[5],
+                    image_url=row[6],
                 )
                 articles.append(article)
             
@@ -280,6 +284,7 @@ class NewsletterSender:
                        groups: Dict[str, List[int]] = None):
         """Send newsletter to all recipients"""
         try:
+            print(len(emails))
             server = smtplib.SMTP(smtp_config['host'], smtp_config['port'])
             server.starttls()
             server.login(smtp_config['auth']['user'], smtp_config['auth']['pass'])
@@ -295,9 +300,11 @@ class NewsletterSender:
 
             results = {'successful': [], 'failed': []}
             batch_size = 50
-
+            print(len(emails))
             for i in range(0, len(emails), batch_size):
                 batch = emails[i:i + batch_size]
+                # The error is likely happening in this print statement if len(emails) is None, since None > int is not supported.
+                # TypeError: '>' not supported between instances of 'NoneType' and 'int'
                 print(f"Sending batch {(i//batch_size) + 1}/{(len(emails)-1)//batch_size + 1}")
 
                 for email in batch:
